@@ -8,8 +8,8 @@ import datetime
 class Article(models.Model):
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=1024)
-    pub_date = models.DateTimeField('date published', auto_now_add=True)
-    last_modified = models.DateTimeField(auto_now=True)
+    pub_date = models.DateTimeField('date published')
+    last_modified = models.DateTimeField()
 
     def was_published_recently(self):
         """
@@ -19,7 +19,7 @@ class Article(models.Model):
         return now-datetime.timedelta(days=RECENT_THRESHOLD_DAYS) <= self.pub_date <= now
 
     def __str__(self):
-        return self.blog_title
+        return self.title
 
 class Comment(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)

@@ -13,7 +13,7 @@ def create_article(title, days):
     (negative for past, positive for future)
     """
     time = timezone.now() + datetime.timedelta(days=days)
-    return Article.objects.create(title=title, pub_date=time)
+    return Article.objects.create(title=title, pub_date=time, last_modified=time)
 
 class BlogIndexViewTests(TestCase):
     def test_no_articles(self):
@@ -25,7 +25,7 @@ class BlogIndexViewTests(TestCase):
 
         self.assertEquals(response.status_code, 200)
         self.assertContains(response, "No articles are available.")
-        self.assertQuerysetEquals(response.context['articles'], [])
+        self.assertQuerysetEqual(response.context['articles'], [])
 
     def test_future_articles(self):
         """
@@ -38,7 +38,7 @@ class BlogIndexViewTests(TestCase):
 
         self.assertEquals(response.status_code, 200)
         self.assertContains(response, "No articles are available.")
-        self.assertQuerysetEquals(response.context['articles'], [])
+        self.assertQuerysetEqual(response.context['articles'], [])
 
     def test_past_articles(self):
         """
@@ -49,7 +49,7 @@ class BlogIndexViewTests(TestCase):
         response = self.client.get(reverse('blog:index'))
 
         self.assertEquals(response.status_code, 200)
-        self.assertQuerysetEquals(
+        self.assertQuerysetEqual(
             response.context['articles'],
             ['<Article: past article>',])
 
@@ -64,7 +64,7 @@ class BlogIndexViewTests(TestCase):
         response = self.client.get(reverse('blog:index'))
 
         self.assertEquals(response.status_code, 200)
-        self.assertQuerysetEquals(
+        self.assertQuerysetEqual(
             response.context['articles'],
             ['<Article: past article>',])
 
@@ -74,8 +74,23 @@ class BlogIndexViewTests(TestCase):
         """
 
         create_article('older article', -10)
-        create_article('newer article', 10)
+        create_article('newer article', -5)
 
-        self.assertQuerysetEquals(
+        response = self.client.get(reverse('blog:index'))
+
+        self.assertEquals(response.status_code, 200)
+        self.assertQuerysetEqual(
             response.context['articles'],
             ['<Article: newer article>', '<Article: older article>',])
+
+    def test_article_link(self):
+        """
+        If an article appears, it should have a link to it's article page
+        """
+
+        article = create_article('article', -10)
+
+        response = self.client.get(reverse('blog:index'))
+
+        self.assertEquals(response.status_code, 200)
+        self.assertContains(response, "/blog/"+str(article.id))
