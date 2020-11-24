@@ -10,8 +10,8 @@ from django.utils import timezone
 def index(request):
     return HttpResponse("Hello world, you're at the contact me index page")
 
-def connect(request):
-    return HttpResponse("Hello world, you're at the contact me connect page")
+def contact(request):
+    return HttpResponse("Hello world, you're at the contact me contact page")
 
 def success(request):
     return HttpResponse("Hello world, you're at the contact me success page")
